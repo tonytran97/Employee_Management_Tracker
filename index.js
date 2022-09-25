@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 
+// my protection
 require('dotenv').config();
 
 // creating the connection to the database
@@ -17,12 +18,30 @@ const dbConnection = mysql.createConnection({
 
 // Will display the departments table
 const viewDepartments = () => {
-    dbConnection.query('SELECT * FROM department', function(err, results) {
+    let sql = 'SELECT * FROM department'
+    dbConnection.query(sql, function(err, results) {
     // console.log(results);
     console.table('Departments', results);
     init();
 })};
 
+// Will display the role table with specific columns
+const viewRole = () => {
+    // var declaration & assignment makes it more readable
+    let sql = `
+    SELECT 
+        role.title AS Job_Title,
+        role.id AS Role_ID_Number,
+        department.name AS Department,
+        role.salary AS Salary
+    FROM role
+    INNER JOIN department 
+    ON role.department_id = department.id`;
+    dbConnection.query(sql, function(err, results) {
+    console.log(results);
+    console.table('Available Roles', results);
+    init();
+})};
 
 // initation
 const init = () => {
@@ -39,6 +58,9 @@ const init = () => {
         switch(selection.start) {
             case 'View All Departments':
             viewDepartments();
+            break;
+            case 'View All Roles':
+            viewRole();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
