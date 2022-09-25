@@ -20,7 +20,6 @@ const dbConnection = mysql.createConnection({
 const viewDepartments = () => {
     let sql = 'SELECT * FROM department'
     dbConnection.query(sql, function(err, results) {
-    // console.log(results);
     console.table('Departments', results);
     init();
 })};
@@ -38,8 +37,29 @@ const viewRole = () => {
     INNER JOIN department 
     ON role.department_id = department.id`;
     dbConnection.query(sql, function(err, results) {
-    console.log(results);
     console.table('Available Roles', results);
+    init();
+})};
+
+// Will display the employee table with specific columns
+const viewEmployees = () => {
+    // var declaration & assignment makes it more readable
+    // self joining requires an alias
+    let sql = `
+    SELECT 
+        e.id AS Employee_ID,
+        e.first_name AS First_Name, 
+        e.last_name AS Last_Name,
+        r.title AS Role_Title,
+        r.salary AS Salary,
+        e.manager_id AS Manager
+    FROM employee e
+    INNER JOIN role r
+    ON e.role_id = r.id
+    INNER JOIN employee i
+    ON e.manager_id = i.id`;
+    dbConnection.query(sql, function(err, results) {
+    console.table('Employees', results);
     init();
 })};
 
@@ -61,6 +81,9 @@ const init = () => {
             break;
             case 'View All Roles':
             viewRole();
+            break;
+            case 'View All Employees':
+            viewEmployees();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
