@@ -63,6 +63,29 @@ const viewEmployees = () => {
     init();
 })};
 
+// function to add a new department
+const addDepartment = () => {
+    inquirer.prompt([
+        {
+            type: 'input', 
+            message: `What is the name of the new department you would like to add?`,
+            name: 'new_department',
+        },
+    ])
+    .then((choice) => {
+        let sql = `
+        INSERT INTO department
+        VALUES (${choice.new_department})`;
+        console.log(sql);
+        dbConnection.query(sql, function(err, results) {
+            dbConnection.query('SELECT * FROM department', function(err, results) {
+            console.table('Department', results)})
+            init();
+        })
+    });
+    }
+
+
 // initation
 const init = () => {
     console.log('Welcome to our Employee Database!'),
@@ -84,6 +107,9 @@ const init = () => {
             break;
             case 'View All Employees':
             viewEmployees();
+            break;
+            case 'Add Department':
+            addDepartment();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
