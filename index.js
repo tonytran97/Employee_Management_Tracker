@@ -52,11 +52,11 @@ const viewEmployees = () => {
         e.last_name AS Last_Name,
         r.title AS Role_Title,
         r.salary AS Salary,
-        e.manager_id AS Manager
+        CONCAT(i.first_name, ' ', i.last_name) AS Manager
     FROM employee e
     INNER JOIN role r
     ON e.role_id = r.id
-    INNER JOIN employee i
+    LEFT JOIN employee i
     ON e.manager_id = i.id`;
     dbConnection.query(sql, function(err, results) {
     console.table('Employees', results);
