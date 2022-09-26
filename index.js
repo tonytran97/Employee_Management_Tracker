@@ -227,7 +227,6 @@ const updateEmployeeRole = () => {
         },
     ])
     .then((choice) => {
-        // role updated, however, need to refactor to update the manager as well
         let sql = `
         UPDATE employee
         SET role_id = ${choice.role}
@@ -243,6 +242,47 @@ const updateEmployeeRole = () => {
 });
 }
 
+// function to update selected employee's manager
+const updateManager = () => {
+    let employeeBucket = 'SELECT * from employee';
+        dbConnection.query(employeeBucket, function (err, employeeResult) {
+            if (err) console.log(err)
+            // console.log(employeeResult);
+    inquirer.prompt([
+        {
+            type: 'list', 
+            message: `Which employee's manager do you want to update?`,
+            choices: employeeResult.map((result) => ({
+                name : (`${result.first_name} ${result.last_name}`),
+                value : result.first_name
+            })),
+            name: 'employee',
+        },
+        {
+            type: 'list', 
+            message: `Who is the new manager?`,
+            choices: employeeResult.map((result) => ({
+                name : (`${result.first_name} ${result.last_name}`),
+                value : result.id
+            })),
+            name: 'manager',
+        },
+    ])
+    .then((choice) => {
+        let sql = `
+        UPDATE employee
+        SET manager_id = ${choice.manager}
+        WHERE First_Name = '${choice.employee}'`;
+        // console.log(sql);
+        dbConnection.query(sql, function(err, results) {
+        //     console.log("err = "+ err)
+        //    console.log("results = "+ results)
+        console.log(`${choice.employee}'s manager has been updated`);
+        init();
+        })
+    })})
+};
+
 // initation
 const init = () => {
     console.log('Welcome to our Employee Database!'),
@@ -250,7 +290,7 @@ const init = () => {
         {
             type: 'list', 
             message: `What would you like to do?`,
-            choices: ['View All Employees', 'Add Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee Role', 'Exit'], 
+            choices: ['View All Employees', 'Add Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee Role', 'Update Manager', 'Exit'], 
             name: 'start',
         },
     ])
@@ -276,6 +316,9 @@ const init = () => {
             break;
             case 'Update Employee Role':
             updateEmployeeRole();
+            break;
+            case 'Update Manager':
+            updateManager();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
