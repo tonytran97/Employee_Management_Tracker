@@ -74,17 +74,19 @@ const addDepartment = () => {
     ])
     .then((choice) => {
         let sql = `
-        INSERT INTO department
-        VALUES (${choice.new_department})`;
-        console.log(sql);
+        INSERT INTO department (name)
+        VALUES ("${choice.new_department}")`;
+        // console.log(sql);
         dbConnection.query(sql, function(err, results) {
-            dbConnection.query('SELECT * FROM department', function(err, results) {
-            console.table('Department', results)})
-            init();
-        })
-    });
+        //     console.log("err = "+ err)
+        //    console.log("results = "+ results)
+          dbConnection.query("SELECT * FROM department", function(err, results) {
+        //   console.log(results);
+            console.table("Department", results)})
+          init();
+      })
+  });
     }
-
 
 // initation
 const init = () => {
