@@ -88,14 +88,10 @@ const addDepartment = () => {
 
 // function to add a new Role
 const addRole = () => {
-    let roleBucket = 'SELECT * from role';
-    dbConnection.query(roleBucket, function (err, result) {
-        // if (err) console.log(err)
-        // else console.log(results);
-    // result.forEach((role) => {
-    //     console.log(role.title);
-    // })
-
+    let departmentBucket = 'SELECT * from department';
+    dbConnection.query(departmentBucket, function (err, result) {
+        if (err) console.log(err)
+        // console.log(result);
     inquirer.prompt([
         {
             type: 'input',
@@ -110,26 +106,86 @@ const addRole = () => {
         {
             type: 'rawlist',
             message: 'Which department does this role belong to?',
-            choices: () => 
-            result.map((result) => result.title),
+            // each of the choices are given a name and a value
+            // selecting one of the choices will then output an integer instead of a string
+            choices: result.map((result) => ({
+                name : result.name,
+                value : result.id
+            })),
             name: 'department'
         },
     ])
     .then((choices) => {
-        // need to take the chosen department and convert that into an INT
-        console.log(choices.department);
+        // console.log(choices.department);
         let sql = `
         INSERT INTO role (title, salary, department_id)
         VALUES ('${choices.role}', ${choices.salary}, ${choices.department})`;
-        console.log(sql);
+        // console.log(sql);
         dbConnection.query(sql, function(err, results) {
-        console.log("err = "+ err)
-        console.log("results = "+ results)
+        // console.log("err = "+ err)
+        // console.log("results = "+ results)
         console.log(`${choices.role} has been added to the database.`);
         init();
         })
     });
 })}
+
+// function to add a new employee
+const addEmployee = () => {
+    let roleBucket = 'SELECT * from role';
+    dbConnection.query(roleBucket, function (err, roleResult) {
+        if (err) console.log(err)
+        // console.log(roleResult);
+        let employeeBucket = 'SELECT * from employee';
+        dbConnection.query(employeeBucket, function (err, employeeResult) {
+            if (err) console.log(err)
+            // console.log(employeeResult);
+    inquirer.prompt([
+        {
+            type: 'input', 
+            message: `What is the employee's first name`,
+            name: 'first_name',
+        },
+        {
+            type: 'input', 
+            message: `What is the employee's last name`,
+            name: 'last_name',
+        },
+        {
+            type: 'rawlist', 
+            message: `What is the employee's role?`,
+            choices: roleResult.map((result) => ({
+                name : result.title,
+                value : result.id
+            })),
+            name: 'role',
+        },
+        {
+            type: 'rawlist', 
+            message: `Who is the new employee's manager?`,
+            // need to add none as an option
+            choices: employeeResult.map((result) => ({
+                name : (`${result.first_name} ${result.last_name}`),
+                value : result.id
+            })),
+            name: 'manager'
+        },
+    ])
+    .then((choices) => {
+        // console.log(choices.role);
+        // console.log(choice.manager);
+        let sql = `
+        INSERT INTO employee (first_name, last_name, role_id, manager_id)
+        VALUES ('${choices.first_name}', '${choices.last_name}', ${choices.role}, ${choices.manager})`;
+        // console.log(sql);
+        dbConnection.query(sql, function(err, results) {
+        // console.log("err = "+ err)
+        // console.log("results = "+ results)
+        console.log(`${choices.first_name} ${choices.last_name} has been added to the database.`);
+        init();
+        })
+    });
+})})}
 
 // initation
 const init = () => {
@@ -158,6 +214,9 @@ const init = () => {
             break;
             case 'Add Role':
             addRole();
+            break;
+            case 'Add Employee':
+            addEmployee();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
