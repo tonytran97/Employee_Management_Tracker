@@ -283,6 +283,44 @@ const updateManager = () => {
     })})
 };
 
+// Will display the employee table sorted by selected Manager
+const viewbyManager = () => {
+    let employeeBucket = 'SELECT * from employee';
+    dbConnection.query(employeeBucket, function (err, employeeResult) {
+        if (err) console.log(err)
+        // console.log(employeeResult);
+    inquirer.prompt([
+        {
+            type: 'list', 
+            message: `Who would you like to select?`,
+            choices: employeeResult.map((result) => ({
+                name : (`${result.first_name} ${result.last_name}`),
+                value : result.id
+            })),
+            name: 'manager',
+        },
+    ])
+    .then((choice) => {
+        // console.log(choice.manager);
+        let sql = `
+    SELECT 
+        e.id AS Employee_ID,
+        e.first_name AS First_Name, 
+        e.last_name AS Last_Name,
+        e.manager_id AS Manager_ID
+    FROM employee e
+    WHERE e.manager_id = '${choice.manager}' `;
+    // currently displays the manager id, if possible, refactor to say manager's name instead
+    dbConnection.query(sql, function(err, results) {
+        //    console.log("err = "+ err)
+        //    console.log("results = "+ results)
+    if (results == '') console.log('This employee is not a manager, try selecting another person');
+    else console.table(`Employees`, results);
+    init();
+        })
+    });
+})};
+
 // initation
 const init = () => {
     console.log('Welcome to our Employee Database!'),
@@ -290,7 +328,7 @@ const init = () => {
         {
             type: 'list', 
             message: `What would you like to do?`,
-            choices: ['View All Employees', 'Add Employee', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee Role', 'Update Manager', 'Exit'], 
+            choices: ['View All Employees', 'Add Employee', 'View Employees by Manager', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee Role', 'Update Manager', 'Exit'], 
             name: 'start',
         },
     ])
@@ -319,6 +357,9 @@ const init = () => {
             break;
             case 'Update Manager':
             updateManager();
+            break;
+            case 'View Employees by Manager':
+            viewbyManager();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
