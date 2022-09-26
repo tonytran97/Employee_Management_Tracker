@@ -139,7 +139,17 @@ const addEmployee = () => {
         let employeeBucket = 'SELECT * from employee';
         dbConnection.query(employeeBucket, function (err, employeeResult) {
             if (err) console.log(err)
+            // pushing in a fill in employee manager slot which is later to be selected as a none option
+            let none = {
+                id: 999999,
+                first_name: 'none',
+                last_name: '',
+                role_id: null,
+                manager_id: null
+              };
+            employeeResult.push(none);
             // console.log(employeeResult);
+            
     inquirer.prompt([
         {
             type: 'input', 
@@ -163,7 +173,6 @@ const addEmployee = () => {
         {
             type: 'rawlist', 
             message: `Who is the new employee's manager?`,
-            // need to add none as an option
             choices: employeeResult.map((result) => ({
                 name : (`${result.first_name} ${result.last_name}`),
                 value : result.id
