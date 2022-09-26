@@ -29,13 +29,13 @@ const viewRole = () => {
     // var declaration & assignment makes it more readable
     let sql = `
     SELECT 
-        role.title AS Job_Title,
-        role.id AS Role_ID_Number,
-        department.name AS Department,
-        role.salary AS Salary
-    FROM role
-    INNER JOIN department 
-    ON role.department_id = department.id`;
+        r.title AS Job_Title,
+        r.id AS Role_ID_Number,
+        d.name AS Department,
+        r.salary AS Salary
+    FROM role r
+    INNER JOIN department d
+    ON r.department_id = d.id`;
     dbConnection.query(sql, function(err, results) {
     console.table('Available Roles', results);
     init();
@@ -86,6 +86,41 @@ const addDepartment = () => {
     });
 }
 
+// function to add a new Role
+const addRole = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'What is the name of the new role?',
+            name: 'role'
+        },
+        {
+            type: 'input',
+            message: 'What is the salary of this role?',
+            name: 'salary'
+        },
+        {
+            // come back to this, works only if you put the correct department id
+            // need to somehow make a list of the departments
+            type: 'input',
+            message: 'Which department does this role belong to?',
+            name: 'department'
+        },
+    ])
+    .then((choices) => {
+        let sql = `
+        INSERT INTO role (title, salary, department_id)
+        VALUES ('${choices.role}', ${choices.salary}, ${choices.department})`;
+        console.log(sql);
+        dbConnection.query(sql, function(err, results) {
+        console.log("err = "+ err)
+        console.log("results = "+ results)
+        console.log(`${choices.role} has been added to the database.`);
+        init();
+        })
+    });
+}
+
 // initation
 const init = () => {
     console.log('Welcome to our Employee Database!'),
@@ -110,6 +145,9 @@ const init = () => {
             break;
             case 'Add Department':
             addDepartment();
+            break;
+            case 'Add Role':
+            addRole();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
