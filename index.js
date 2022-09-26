@@ -88,6 +88,14 @@ const addDepartment = () => {
 
 // function to add a new Role
 const addRole = () => {
+    let roleBucket = 'SELECT * from role';
+    dbConnection.query(roleBucket, function (err, result) {
+        // if (err) console.log(err)
+        // else console.log(results);
+    // result.forEach((role) => {
+    //     console.log(role.title);
+    // })
+
     inquirer.prompt([
         {
             type: 'input',
@@ -100,14 +108,16 @@ const addRole = () => {
             name: 'salary'
         },
         {
-            // come back to this, works only if you put the correct department id
-            // need to somehow make a list of the departments
-            type: 'input',
+            type: 'rawlist',
             message: 'Which department does this role belong to?',
+            choices: () => 
+            result.map((result) => result.title),
             name: 'department'
         },
     ])
     .then((choices) => {
+        // need to take the chosen department and convert that into an INT
+        console.log(choices.department);
         let sql = `
         INSERT INTO role (title, salary, department_id)
         VALUES ('${choices.role}', ${choices.salary}, ${choices.department})`;
@@ -119,7 +129,7 @@ const addRole = () => {
         init();
         })
     });
-}
+})}
 
 // initation
 const init = () => {
