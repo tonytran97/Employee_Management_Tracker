@@ -283,8 +283,8 @@ const updateManager = () => {
     })})
 };
 
-// Will display the employee table sorted by selected Manager
-const viewbyManager = () => {
+// Allows users to view employees by manager
+const viewByManager = () => {
     let employeeBucket = 'SELECT * from employee';
     dbConnection.query(employeeBucket, function (err, employeeResult) {
         if (err) console.log(err)
@@ -321,6 +321,50 @@ const viewbyManager = () => {
     });
 })};
 
+// Allows users to view employees by department
+const viewByDepartment = () => {
+    let departmentBucket = 'SELECT * from department';
+    dbConnection.query(departmentBucket, function (err, departmentResult) {
+        if (err) console.log(err)
+        // console.log(departmentResult);
+    inquirer.prompt([
+        {
+            type: 'list', 
+            message: `Which department would you like to select?`,
+            choices: departmentResult.map((result) => ({
+                name : `${result.name}`,
+                value : result.id
+            })),
+            name: 'department',
+        },
+    ])
+    .then((choice) => {
+        // console.log(choice.department);
+        let sql = `
+    SELECT 
+    e.id AS Employee_ID,
+    e.first_name AS First_Name, 
+    e.last_name AS Last_Name,
+    d.id AS Department_ID
+    FROM employee e
+    JOIN role r
+    ON e.id = r.id
+    JOIN employee ee
+    ON ee.role_id = r.id
+    JOIN department d
+    ON r.department_id = d.id
+    WHERE d.id = '${choice.department}' `;
+    // currently displays the department id, if possible, refactor to say department's name instead
+    dbConnection.query(sql, function(err, results) {
+        //    console.log("err = "+ err)
+        //    console.log("results = "+ results)
+    if (results == '') console.log('This department currently does not have an employees');
+    else console.table(`Employees`, results);
+    init();
+        })
+    });
+})};
+
 // initation
 const init = () => {
     console.log('Welcome to our Employee Database!'),
@@ -328,7 +372,7 @@ const init = () => {
         {
             type: 'list', 
             message: `What would you like to do?`,
-            choices: ['View All Employees', 'Add Employee', 'View Employees by Manager', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Update Employee Role', 'Update Manager', 'Exit'], 
+            choices: ['View All Employees', 'Add Employee', 'View Employees by Manager', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'View Employees by Department', 'Update Employee Role', 'Update Manager', 'Exit'], 
             name: 'start',
         },
     ])
@@ -359,7 +403,10 @@ const init = () => {
             updateManager();
             break;
             case 'View Employees by Manager':
-            viewbyManager();
+            viewByManager();
+            break;
+            case 'View Employees by Department':
+            viewByDepartment();
             break;
             default: dbConnection.end();
             console.log('Thank you for using the Employee DB Tracker');
