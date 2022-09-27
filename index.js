@@ -20,6 +20,7 @@ const dbConnection = mysql.createConnection({
 const viewDepartments = () => {
     let sql = 'SELECT * FROM department'
     dbConnection.query(sql, function(err, results) {
+    if (err) console.log(err)
     console.table('Departments', results);
     init();
 })};
@@ -37,6 +38,7 @@ const viewRole = () => {
     INNER JOIN department d
     ON r.department_id = d.id`;
     dbConnection.query(sql, function(err, results) {
+    if (err) console.log(err)
     console.table('Available Roles', results);
     init();
 })};
@@ -59,6 +61,7 @@ const viewEmployees = () => {
     LEFT JOIN employee i
     ON e.manager_id = i.id`;
     dbConnection.query(sql, function(err, results) {
+    if (err) console.log(err)
     console.table('Employees', results);
     init();
 })};
@@ -76,10 +79,8 @@ const addDepartment = () => {
         let sql = `
         INSERT INTO department (name)
         VALUES ('${choice.new_department}')`;
-        // console.log(sql);
         dbConnection.query(sql, function(err, results) {
-        //     console.log("err = "+ err)
-        //    console.log("results = "+ results)
+        if (err) console.log(err)
         console.log(`${choice.new_department} has been added to the database.`);
         init();
         })
@@ -90,8 +91,7 @@ const addDepartment = () => {
 const addRole = () => {
     let departmentBucket = 'SELECT * from department';
     dbConnection.query(departmentBucket, function (err, result) {
-        if (err) console.log(err)
-        // console.log(result);
+    if (err) console.log(err)
     inquirer.prompt([
         {
             type: 'input',
@@ -116,14 +116,11 @@ const addRole = () => {
         },
     ])
     .then((choices) => {
-        // console.log(choices.department);
         let sql = `
         INSERT INTO role (title, salary, department_id)
         VALUES ('${choices.role}', ${choices.salary}, ${choices.department})`;
-        // console.log(sql);
         dbConnection.query(sql, function(err, results) {
-        // console.log("err = "+ err)
-        // console.log("results = "+ results)
+        if (err) console.log(err)
         console.log(`${choices.role} has been added to the database.`);
         init();
         })
@@ -135,7 +132,6 @@ const addEmployee = () => {
     let roleBucket = 'SELECT * from role';
     dbConnection.query(roleBucket, function (err, roleResult) {
         if (err) console.log(err)
-        // console.log(roleResult);
         let employeeBucket = 'SELECT * from employee';
         dbConnection.query(employeeBucket, function (err, employeeResult) {
             if (err) console.log(err)
@@ -148,7 +144,6 @@ const addEmployee = () => {
                 manager_id: null
               };
             employeeResult.push(none);
-            // console.log(employeeResult);
             
     inquirer.prompt([
         {
@@ -181,15 +176,11 @@ const addEmployee = () => {
         },
     ])
     .then((choices) => {
-        // console.log(choices.role);
-        // console.log(choice.manager);
         let sql = `
         INSERT INTO employee (first_name, last_name, role_id, manager_id)
         VALUES ('${choices.first_name}', '${choices.last_name}', ${choices.role}, ${choices.manager})`;
-        // console.log(sql);
         dbConnection.query(sql, function(err, results) {
-        // console.log("err = "+ err)
-        // console.log("results = "+ results)
+        if (err) console.log(err)
         console.log(`${choices.first_name} ${choices.last_name} has been added to the database.`);
         init();
         })
@@ -201,11 +192,9 @@ const updateEmployeeRole = () => {
     let employeeBucket = 'SELECT * from employee';
         dbConnection.query(employeeBucket, function (err, employeeResult) {
             if (err) console.log(err)
-            // console.log(employeeResult);
             let roleBucket = 'SELECT * from role';
             dbConnection.query(roleBucket, function (err, roleResult) {
                 if (err) console.log(err)
-                // console.log(roleResult);
     inquirer.prompt([
         {
             type: 'list', 
@@ -231,10 +220,8 @@ const updateEmployeeRole = () => {
         UPDATE employee
         SET role_id = ${choice.role}
         WHERE First_Name = '${choice.employee}'`;
-        // console.log(sql);
         dbConnection.query(sql, function(err, results) {
-        //     console.log("err = "+ err)
-        //    console.log("results = "+ results)
+        if (err) console.log(err)
         console.log(`${choice.employee}'s role has been updated`);
         init();
         })
@@ -247,7 +234,6 @@ const updateManager = () => {
     let employeeBucket = 'SELECT * from employee';
         dbConnection.query(employeeBucket, function (err, employeeResult) {
             if (err) console.log(err)
-            // console.log(employeeResult);
     inquirer.prompt([
         {
             type: 'list', 
@@ -273,10 +259,8 @@ const updateManager = () => {
         UPDATE employee
         SET manager_id = ${choice.manager}
         WHERE First_Name = '${choice.employee}'`;
-        // console.log(sql);
         dbConnection.query(sql, function(err, results) {
-        //     console.log("err = "+ err)
-        //    console.log("results = "+ results)
+        if (err) console.log(err)
         console.log(`${choice.employee}'s manager has been updated`);
         init();
         })
@@ -288,7 +272,6 @@ const viewByManager = () => {
     let employeeBucket = 'SELECT * from employee';
     dbConnection.query(employeeBucket, function (err, employeeResult) {
         if (err) console.log(err)
-        // console.log(employeeResult);
     inquirer.prompt([
         {
             type: 'list', 
@@ -301,7 +284,6 @@ const viewByManager = () => {
         },
     ])
     .then((choice) => {
-        // console.log(choice.manager);
         let sql = `
     SELECT 
         e.id AS Employee_ID,
@@ -312,8 +294,6 @@ const viewByManager = () => {
     WHERE e.manager_id = '${choice.manager}' `;
     // currently displays the manager id, if possible, refactor to say manager's name instead
     dbConnection.query(sql, function(err, results) {
-        //    console.log("err = "+ err)
-        //    console.log("results = "+ results)
     if (results == '') console.log('This employee is not a manager, try selecting another person');
     else console.table(`Employees`, results);
     init();
@@ -326,7 +306,6 @@ const viewByDepartment = () => {
     let departmentBucket = 'SELECT * from department';
     dbConnection.query(departmentBucket, function (err, departmentResult) {
         if (err) console.log(err)
-        // console.log(departmentResult);
     inquirer.prompt([
         {
             type: 'list', 
@@ -339,7 +318,6 @@ const viewByDepartment = () => {
         },
     ])
     .then((choice) => {
-        // console.log(choice.department);
         let sql = `
     SELECT 
     e.id AS Employee_ID,
@@ -356,8 +334,6 @@ const viewByDepartment = () => {
     WHERE d.id = '${choice.department}' `;
     // currently displays the department id, if possible, refactor to say department's name instead
     dbConnection.query(sql, function(err, results) {
-        //    console.log("err = "+ err)
-        //    console.log("results = "+ results)
     if (results == '') console.log('This department currently does not have an employees');
     else console.table(`Employees`, results);
     init();
